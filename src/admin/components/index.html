@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payload Admin Redirect Fix</title>
+  <script>
+    // This script injects the redirect fix script into the Payload admin UI
+    (function() {
+      function addRedirectFixScript() {
+        if (window.location.pathname.includes('/admin')) {
+          // Create script element
+          var script = document.createElement('script');
+          script.src = '/admin/components/redirectFix.js';
+          script.async = true;
+          document.head.appendChild(script);
+          
+          console.log('Injected redirect fix script into Payload admin');
+          
+          // Also add manual fix logic in case the script doesn't load
+          if (window.location.pathname.includes('/undefined')) {
+            const lastKnownProductID = localStorage.getItem('lastKnownProductID');
+            if (lastKnownProductID) {
+              console.log('Manually fixing redirect to', lastKnownProductID);
+              window.location.href = window.location.pathname.replace('undefined', lastKnownProductID);
+            }
+          }
+          
+          // Listen for API responses
+          const originalFetch = window.fetch;
+          window.fetch = async function(url, options) {
+            const response = await originalFetch(url, options);
+            
+            try {
+              if (typeof url === 'string' && url.includes('/api/products') && options?.method === 'POST') {
+                const clone = response.clone();
+                const data = await clone.json();
+                
+                if (data && data.id) {
+                  console.log('Saving product ID:', data.id);
+                  localStorage.setItem('lastKnownProductID', data.id.toString());
+                }
+              }
+            } catch (e) {
+              // Ignore errors
+            }
+            
+            return response;
+          };
+        }
+      }
+      
+      // Run once on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addRedirectFixScript);
+      } else {
+        addRedirectFixScript();
+      }
+      
+      // Also run after page transitions in single-page apps
+      window.addEventListener('popstate', addRedirectFixScript);
+    })();
+  </script>
+</head>
+<body>
+  <p>This file contains a script that fixes the redirect issue in Payload admin.</p>
+  <p>It should be loaded by the browser when you access the Payload admin interface.</p>
+</body>
+</html> 
