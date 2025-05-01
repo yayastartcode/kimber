@@ -1,5 +1,10 @@
 import { getPayloadClient } from '@/payload'
 import { NextResponse } from 'next/server'
+import type { Product } from '@/payload-types'
+
+// Type for the product data excluding auto-generated fields
+type ProductData = Omit<Product, "updatedAt" | "createdAt" | "id"> & 
+  Partial<Pick<Product, "updatedAt" | "createdAt" | "id">>;
 
 export async function GET(request: Request) {
   try {
@@ -42,7 +47,7 @@ export async function POST(request: Request) {
     
     // Check if the data is coming as a _payload field (which contains JSON)
     const payloadField = formData.get('_payload')
-    let data: Record<string, any>
+    let data: Record<string, unknown>
     
     if (payloadField && typeof payloadField === 'string') {
       // Parse the JSON string from the _payload field
@@ -82,7 +87,7 @@ export async function POST(request: Request) {
     // Create the product using Payload CMS
     const product = await payload.create({
       collection: 'products',
-      data,
+      data: data as ProductData,
     })
     
     return NextResponse.json(product)

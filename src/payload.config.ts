@@ -11,12 +11,10 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Header } from './collections/Header'
 import { Hero } from './collections/Hero'
-import { AboutUs } from './collections/AboutUs'
-import { CompanyValues } from './collections/CompanyValues'
 import { Products } from './collections/Products'
-import { Clients } from './collections/Clients'
 import { Location } from './collections/Location'
 import { SiteSettings } from './collections/SiteSettings'
+import { HowTo } from './collections/HowTo'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,7 +26,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Header, Hero, AboutUs, CompanyValues, Products, Clients, Location, SiteSettings],
+  collections: [Users, Media, Header, Hero, Products, Location, SiteSettings, HowTo],
   globals: [],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

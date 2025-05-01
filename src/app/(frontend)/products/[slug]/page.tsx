@@ -1,48 +1,125 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import RichText from '@/components/RichText';
+import ProductDetail from './ProductDetail';
 import Header from '@/app/(frontend)/components/Header';
 import Footer from '@/app/(frontend)/components/Footer';
 
-
 interface Product {
-  id: string;
+  id: string | number;
   title: string;
   slug: string;
   price: number;
-  description: string;
-  image: {
-    url: string;
-    alt?: string;
+  description: {
+    root: {
+      children: Array<{
+        type?: string;
+        text?: string;
+        children?: Array<{
+          text: string;
+        }>;
+      }>;
+    };
   };
-  specifications?: {
-    key: string;
+  brand?: string;
+  mainImage?: {
+    id: string | number;
+    alt?: string;
+    url: string;
+    filename: string;
+    mimeType: string;
+    filesize: number;
+    width: number;
+    height: number;
+  };
+  gallery?: Array<{
+    image: {
+      url: string;
+      alt: string;
+    };
+    isFeature: boolean;
+  }>;
+  specifications?: Array<{
+    name: string;
     value: string;
-  }[];
+  }>;
 }
 
 type Params = Promise<{ slug: string }>
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/products?where[slug][equals]=${slug}`, {
+    // Explicitly construct the URL to ensure it's correct
+    const apiUrl = `${process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'}/api/products?where[slug][equals]=${encodeURIComponent(slug)}`;
+    
+    console.log(`Fetching product with URL: ${apiUrl}`);
+    
+    const res = await fetch(apiUrl, {
       next: { revalidate: 60 },
+      headers: {
+        'Accept': 'application/json'
+      }
     });
     
-    if (!res.ok) return null;
-    
-    const data = await res.json();
-    // The API returns the product directly, not in a docs array
-    if (!data) {
+    if (!res.ok) {
+      console.error(`API returned status: ${res.status} ${res.statusText}`);
       return null;
     }
     
-    return data;
+    const data = await res.json();
+    console.log('API response:', JSON.stringify(data).substring(0, 200) + '...');
+    
+    // Check if data is a valid product
+    if (!data) {
+      console.log('No product data returned from API');
+      return null;
+    }
+    
+    // Handle both array and single object responses
+    let product: Product | null = null;
+    
+    if (Array.isArray(data)) {
+      // If it's an array, take the first item if available
+      if (data.length > 0) {
+        product = data[0];
+      } else {
+        console.log('Empty array returned from API for slug:', slug);
+        return null;
+      }
+    } else if (typeof data === 'object' && data !== null) {
+      // If it's already a single object, use it directly
+      product = data;
+    } else {
+      console.log('Unexpected API response format for slug:', slug);
+      return null;
+    }
+    
+    // Verify we have a product with the correct slug
+    if (product && product.slug === slug) {
+      console.log('Product found:', product.title);
+      return product;
+    } else {
+      console.log('Product slug mismatch or invalid product');
+      return null;
+    }
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
   }
+}
+
+// Helper function to construct proper image URL
+function getImageUrl(url: string): string {
+  if (!url) return '/placeholder-product.jpg';
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000';
+  
+  // If the URL is already absolute, use it directly
+  if (url.startsWith('http')) {
+    return url;
+  }
+  
+  // Otherwise, construct the proper URL based on the API format
+  return `${baseUrl}${url}`;
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
@@ -66,25 +143,27 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     descriptionText = product.description;
   } else if (product.description && typeof product.description === 'object') {
     // Try to extract text from Lexical format
-    const descObj = product.description as any;
-    if (descObj.type === 'paragraph' && Array.isArray(descObj.children)) {
-      descriptionText = descObj.children
-        .map((child: any) => child.text || '')
-        .join(' ');
-    }
-    // Try to extract text from Slate/Payload format
-    else if (descObj.root && Array.isArray(descObj.root.children)) {
+    const descObj = product.description as {
+      root: {
+        children: Array<{
+          text?: string;
+          children?: Array<{
+            text?: string;
+          }>;
+        }>;
+      };
+    };
+    if (descObj.root && Array.isArray(descObj.root.children)) {
       descriptionText = descObj.root.children
-        .map((node: any) => {
+        .map((node) => {
           if (node.text) return node.text;
           if (node.children) {
-            return node.children.map((child: any) => child.text || '').join(' ');
+            return node.children.map((child) => child.text || '').join(' ');
           }
           return '';
         })
         .join(' ');
     }
-    // No fallback content - if we can't extract text, just use an empty string
   }
 
   // Limit description to a reasonable length
@@ -92,30 +171,33 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     ? `${descriptionText.substring(0, 157)}...` 
     : descriptionText;
 
+  // Get proper image URL
+  const imageUrl = product.mainImage ? getImageUrl(product.mainImage.url) : '/placeholder-product.jpg';
+
   return {
-    title: `${product.title} | PT. Wahana Jaya Dinamika`,
-    description: truncatedDescription || `${product.title} - PT. Wahana Jaya Dinamika`,
-    keywords: ['PT. Wahana Jaya Dinamika', product.title, 'industrial products'],
+    title: `${product.title} | Kimsberlin`,
+    description: truncatedDescription || `${product.title} - Kimsberlin`,
+    keywords: ['Kimsberlin', product.title, 'eyewear , opticals , eyeglasses'],
     robots: 'index, follow',
-    openGraph: {
+    openGraph: product.mainImage ? {
       title: product.title,
-      description: truncatedDescription || `${product.title} - PT. Wahana Jaya Dinamika`,
+      description: truncatedDescription || `${product.title} - Kimsberlin`,
       type: 'website',
       url: `${process.env.NEXT_PUBLIC_SITE_URL || ''}/products/${slug}`,
       images: [{
-        url: product.image.url,
-        alt: product.image.alt || product.title,
-        width: 1200,
-        height: 630,
+        url: imageUrl,
+        alt: product.mainImage.alt || product.title,
+        width: product.mainImage.width || 1200,
+        height: product.mainImage.height || 630,
       }],
-      siteName: 'PT. Wahana Jaya Dinamika',
-    },
-    twitter: {
+      siteName: 'Kimsberlin',
+    } : undefined,
+    twitter: product.mainImage ? {
       card: 'summary_large_image',
       title: product.title,
-      description: truncatedDescription || `${product.title} - PT. Wahana Jaya Dinamika`,
-      images: [product.image.url],
-    },
+      description: truncatedDescription || `${product.title} - Kimsberlin`,
+      images: [imageUrl],
+    } : undefined,
   };
 }
 
@@ -126,6 +208,26 @@ export default async function ProductPage({ params }: { params: Params }) {
   if (!product) {
     notFound();
   }
+  
+  // Process images for gallery
+  const processedProduct = {
+    ...product,
+    mainImageUrl: product.mainImage ? getImageUrl(product.mainImage.url) : '/placeholder-product.jpg',
+    galleryImages: [
+      // Include main image in gallery
+      {
+        url: product.mainImage ? getImageUrl(product.mainImage.url) : '/placeholder-product.jpg',
+        alt: product.mainImage?.alt || product.title,
+        isMain: true
+      },
+      // Add gallery images if they exist
+      ...(product.gallery?.map(item => ({
+        url: getImageUrl(item.image.url),
+        alt: item.image.alt,
+        isMain: false
+      })) || [])
+    ]
+  };
   
   // Format price in Indonesian Rupiah
   const formattedPrice = new Intl.NumberFormat('id-ID', {
@@ -140,51 +242,13 @@ export default async function ProductPage({ params }: { params: Params }) {
       <Header />
       <main className="py-16 bg-gray-50">
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-8">
-          {/* Product Image */}
-          <div className="lg:w-1/2">
-            <div className="relative h-[400px] lg:h-[600px] rounded-lg overflow-hidden">
-              <Image
-                src={product.image.url}
-                alt={product.image.alt || product.title}
-                fill
-                style={{ objectFit: 'cover' }}
-                priority
-              />
-            </div>
-          </div>
-
-          {/* Product Info */}
-          <div className="lg:w-1/2">
-            <p className="text-sm text-gray-500 uppercase tracking-wide mb-2">SMARTSHOP</p>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {product.title}
-            </h1>
-            
-            <p className="text-2xl font-semibold text-red-600 mb-6">{formattedPrice}</p>
-            
-            <div className="prose prose-lg max-w-none mb-8 text-gray-600">
-              <RichText content={product.description} />
-            </div>
-
-            {product.specifications && product.specifications.length > 0 && (
-              <div className="border-t border-gray-200 pt-8">
-                <h2 className="text-xl font-semibold mb-4">Specifications</h2>
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                  {product.specifications.map((spec, index) => (
-                    <div key={index} className="border-b border-gray-200 pb-4">
-                      <dt className="font-medium text-gray-500">{spec.key}</dt>
-                      <dd className="mt-1 text-gray-900">{spec.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            )}
-          </div>
+          <ProductDetail 
+            product={processedProduct} 
+            formattedPrice={formattedPrice} 
+          />
         </div>
-      </div>
-    </main>
-    <Footer />
+      </main>
+      <Footer />
     </>
   );
 }

@@ -9,6 +9,7 @@ interface Product {
   title: string;
   slug: string;
   price: number;
+  brand?: string;
   mainImage: {
     url: string;
     alt?: string;
@@ -20,11 +21,13 @@ const ProductCard = ({
   image, 
   title,
   price,
+  brand,
   link = '#'
 }: { 
   image: string, 
   title: string,
   price: number,
+  brand?: string,
   link?: string
 }) => {
   // Format price in Indonesian Rupiah
@@ -43,12 +46,12 @@ const ProductCard = ({
             src={image} 
             alt={title}
             fill
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: 'cover' }}
             className="p-4"
           />
         </div>
-        <div className="p-4 text-center border-t">
-          <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">SMARTSHOP</p>
+        <div className="p-4 text-center">
+          <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">{brand || "SMARTSHOP"}</p>
           <h3 className="font-medium text-gray-800 mb-2">{title}</h3>
           <p className="text-red-600 font-medium">{formattedPrice}</p>
         </div>
@@ -148,6 +151,7 @@ const RecommendedProducts = () => {
               image={product.mainImage.url} 
               title={product.title}
               price={product.price || 0}
+              brand={product.brand}
               link={`/products/${product.slug}`}
             />
           ))}

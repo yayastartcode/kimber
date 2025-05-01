@@ -70,12 +70,10 @@ export interface Config {
     media: Media;
     header: Header;
     hero: Hero;
-    'about-us': AboutUs;
-    'company-values': CompanyValue;
     products: Product;
-    clients: Client;
     location: Location;
     'site-settings': SiteSetting;
+    'how-to': HowTo;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -86,12 +84,10 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     hero: HeroSelect<false> | HeroSelect<true>;
-    'about-us': AboutUsSelect<false> | AboutUsSelect<true>;
-    'company-values': CompanyValuesSelect<false> | CompanyValuesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
-    clients: ClientsSelect<false> | ClientsSelect<true>;
     location: LocationSelect<false> | LocationSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'how-to': HowToSelect<false> | HowToSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -211,60 +207,11 @@ export interface Hero {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "about-us".
- */
-export interface AboutUs {
-  id: number;
-  title: string;
-  subtitle?: string | null;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  image: number | Media;
-  imageAlt: string;
-  buttonText?: string | null;
-  buttonUrl?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "company-values".
- */
-export interface CompanyValue {
-  id: number;
-  title: string;
-  subtitle?: string | null;
-  /**
-   * Company values and advantages
-   */
-  values: {
-    title: string;
-    description: string;
-    icon?: (number | null) | Media;
-    id?: string | null;
-  }[];
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
+  id: number;
+  productId?: string | null;
   title: string;
   /**
    * The brand or manufacturer of the product
@@ -290,23 +237,32 @@ export interface Product {
     [k: string]: unknown;
   };
   category?: string | null;
+  /**
+   * This will be the primary image shown in product listings and at the top of the product detail page
+   */
   mainImage: number | Media;
   /**
-   * Add additional product images to the gallery
+   * Add additional product images to display in the gallery on the product detail page. Upload multiple angles and closeups for best user experience.
    */
   gallery?:
     | {
+        /**
+         * Additional product images for the gallery - will be shown as thumbnails
+         */
         image: number | Media;
         /**
-         * Alternative text for accessibility
+         * Alternative text for accessibility (required)
          */
         alt: string;
+        /**
+         * Check this to highlight this image in product carousels
+         */
         isFeature?: boolean | null;
         id?: string | null;
       }[]
     | null;
   /**
-   * Product specifications
+   * Product specifications (e.g., dimensions, materials, etc.)
    */
   specifications?:
     | {
@@ -323,22 +279,14 @@ export interface Product {
    * Featured products will be displayed in the Recommended Products section
    */
   featured?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "clients".
- */
-export interface Client {
-  id: number;
-  name: string;
-  logo: number | Media;
-  website?: string | null;
   /**
-   * Order in which this client appears (lower numbers appear first)
+   * Number of items in stock
    */
-  order?: number | null;
+  stock?: number | null;
+  /**
+   * Product reference or SKU
+   */
+  reference?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -411,6 +359,31 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "how-to".
+ */
+export interface HowTo {
+  id: number;
+  title: string;
+  subtitle?: string | null;
+  /**
+   * Steps for the How To section
+   */
+  steps: {
+    title: string;
+    explanation: string;
+    icon: number | Media;
+    /**
+     * Order in which this step appears (lower numbers appear first)
+     */
+    order?: number | null;
+    id?: string | null;
+  }[];
+  backgroundColor?: ('bg-white' | 'bg-gray-50' | 'bg-pink-50') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -433,20 +406,8 @@ export interface PayloadLockedDocument {
         value: number | Hero;
       } | null)
     | ({
-        relationTo: 'about-us';
-        value: number | AboutUs;
-      } | null)
-    | ({
-        relationTo: 'company-values';
-        value: number | CompanyValue;
-      } | null)
-    | ({
         relationTo: 'products';
-        value: string | Product;
-      } | null)
-    | ({
-        relationTo: 'clients';
-        value: number | Client;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'location';
@@ -455,6 +416,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'site-settings';
         value: number | SiteSetting;
+      } | null)
+    | ({
+        relationTo: 'how-to';
+        value: number | HowTo;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -571,43 +536,10 @@ export interface HeroSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "about-us_select".
- */
-export interface AboutUsSelect<T extends boolean = true> {
-  title?: T;
-  subtitle?: T;
-  content?: T;
-  image?: T;
-  imageAlt?: T;
-  buttonText?: T;
-  buttonUrl?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "company-values_select".
- */
-export interface CompanyValuesSelect<T extends boolean = true> {
-  title?: T;
-  subtitle?: T;
-  values?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        icon?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "products_select".
  */
 export interface ProductsSelect<T extends boolean = true> {
-  id?: T;
+  productId?: T;
   title?: T;
   brand?: T;
   price?: T;
@@ -631,18 +563,8 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   slug?: T;
   featured?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "clients_select".
- */
-export interface ClientsSelect<T extends boolean = true> {
-  name?: T;
-  logo?: T;
-  website?: T;
-  order?: T;
+  stock?: T;
+  reference?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -684,6 +606,26 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   footerText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "how-to_select".
+ */
+export interface HowToSelect<T extends boolean = true> {
+  title?: T;
+  subtitle?: T;
+  steps?:
+    | T
+    | {
+        title?: T;
+        explanation?: T;
+        icon?: T;
+        order?: T;
+        id?: T;
+      };
+  backgroundColor?: T;
   updatedAt?: T;
   createdAt?: T;
 }

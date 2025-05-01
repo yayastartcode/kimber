@@ -13,6 +13,14 @@ interface LocationData {
   whatsapp?: string;
 }
 
+interface SiteSettingsData {
+  contactInfo: {
+    whatsapp?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 interface PayloadResponse<T> {
   docs: T[];
   totalDocs: number;
@@ -30,7 +38,7 @@ const LocationMap = () => {
   const [locationData, setLocationData] = useState<LocationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [siteSettings, setSiteSettings] = useState<{ contactInfo: { whatsapp?: string } } | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsData | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,7 +55,7 @@ const LocationMap = () => {
           throw new Error('Failed to fetch site settings');
         }
 
-        const [locationData, settingsData]: [PayloadResponse<LocationData>, PayloadResponse<any>] = await Promise.all([
+        const [locationData, settingsData]: [PayloadResponse<LocationData>, PayloadResponse<SiteSettingsData>] = await Promise.all([
           locationResponse.json(),
           settingsResponse.json()
         ]);

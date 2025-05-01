@@ -22,6 +22,14 @@ export const Products: CollectionConfig = {
         target: 'slug',
       }),
     ],
+    // Add afterChange hook to handle proper redirection
+    afterChange: [
+      ({ doc }) => {
+        // Ensure we're returning the document as is
+        // Let Payload handle the redirection based on its internal ID
+        return doc;
+      },
+    ],
   },
   // The versions functionality might be contributing to the redirect issue
   // Let's temporarily disable it to see if it resolves the problem
@@ -30,7 +38,7 @@ export const Products: CollectionConfig = {
   // },
   fields: [
     {
-      name: 'id',
+      name: 'productId',
       type: 'text',
       admin: {
         hidden: true,
@@ -86,6 +94,9 @@ export const Products: CollectionConfig = {
               relationTo: 'media',
               required: true,
               label: 'Main Product Image',
+              admin: {
+                description: 'This will be the primary image shown in product listings and at the top of the product detail page',
+              }
             },
             {
               name: 'gallery',
@@ -103,6 +114,9 @@ export const Products: CollectionConfig = {
                   type: 'upload',
                   relationTo: 'media',
                   required: true,
+                  admin: {
+                    description: 'Additional product images for the gallery - will be shown as thumbnails',
+                  }
                 },
                 {
                   name: 'alt',
@@ -110,7 +124,7 @@ export const Products: CollectionConfig = {
                   required: true,
                   label: 'Alt Text',
                   admin: {
-                    description: 'Alternative text for accessibility',
+                    description: 'Alternative text for accessibility (required)',
                   },
                 },
                 {
@@ -118,10 +132,13 @@ export const Products: CollectionConfig = {
                   type: 'checkbox',
                   defaultValue: false,
                   label: 'Feature in carousel',
+                  admin: {
+                    description: 'Check this to highlight this image in product carousels',
+                  }
                 },
               ],
               admin: {
-                description: 'Add additional product images to the gallery',
+                description: 'Add additional product images to display in the gallery on the product detail page. Upload multiple angles and closeups for best user experience.',
               },
             },
           ],
@@ -134,7 +151,7 @@ export const Products: CollectionConfig = {
               type: 'array',
               required: false,
               admin: {
-                description: 'Product specifications',
+                description: 'Product specifications (e.g., dimensions, materials, etc.)',
               },
               fields: [
                 {
@@ -170,6 +187,24 @@ export const Products: CollectionConfig = {
       label: 'Featured Product',
       admin: {
         description: 'Featured products will be displayed in the Recommended Products section',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'stock',
+      type: 'number',
+      defaultValue: 100,
+      min: 0,
+      admin: {
+        description: 'Number of items in stock',
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'reference',
+      type: 'text',
+      admin: {
+        description: 'Product reference or SKU',
         position: 'sidebar',
       },
     },

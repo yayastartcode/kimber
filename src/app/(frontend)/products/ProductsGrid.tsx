@@ -5,14 +5,33 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 interface Product {
-  id: string;
+  id: string | number;
   title: string;
   slug: string;
-  image: {
+  mainImage?: {
+    id: string | number;
     url: string;
     alt?: string;
+    filename?: string;
   };
+  brand?: string;
+  price?: number;
   category?: string;
+}
+
+// Helper function to construct proper image URL
+function getImageUrl(product: Product): string {
+  if (!product.mainImage?.url) return '/placeholder-product.jpg';
+  
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || '';
+  
+  // If the URL is already absolute, use it directly
+  if (product.mainImage.url.startsWith('http')) {
+    return product.mainImage.url;
+  }
+  
+  // Otherwise, construct the proper URL based on the API format
+  return `${baseUrl}${product.mainImage.url}`;
 }
 
 // Product card component
@@ -33,7 +52,7 @@ const ProductCard = ({
             src={image} 
             alt={title}
             fill
-            style={{ objectFit: 'contain' }}
+            style={{ objectFit: 'cover' }}
             className="p-4"
           />
         </div>
@@ -63,11 +82,12 @@ const ProductsGrid = () => {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
+        
+        // Log the response for debugging
+        console.log('API response first product:', data && data.length > 0 ? JSON.stringify(data[0]).substring(0, 100) + '...' : 'No products');
+        
         // Ensure data is an array and has the correct structure
         const productsArray = Array.isArray(data) ? data : [];
-        
-
-        
         setProducts(productsArray);
         setLoading(false);
       } catch (err) {
@@ -79,8 +99,6 @@ const ProductsGrid = () => {
 
     fetchProducts();
   }, []);
-
-
 
   if (loading) {
     return (
@@ -105,25 +123,23 @@ const ProductsGrid = () => {
 
   return (
     <div>
-
-      
       {/* Products Grid */}
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map((product) => {
+          // Get the proper image URL using our helper function
+          const imageUrl = getImageUrl(product);
+          console.log(`Product ${product.title}: Using image URL:`, imageUrl);
+            
+          return (
             <ProductCard 
-              key={product.id}
-              image={product.image.url} 
+              key={product.id.toString()}
+              image={imageUrl} 
               title={product.title}
               link={`/products/${product.slug}`}
             />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-8 text-gray-600">
-          No products available at the moment.
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   )
 }

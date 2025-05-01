@@ -1,7 +1,35 @@
 import React from 'react';
 
+interface RichTextChild {
+  text?: string;
+  format?: number;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  children?: RichTextChild[];
+  type?: string;
+}
+
+interface RichTextNode {
+  type?: string;
+  text?: string;
+  children?: RichTextChild[];
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  format?: number;
+}
+
+interface RichTextContent {
+  root?: {
+    children: RichTextNode[];
+  };
+  type?: string;
+  children?: RichTextChild[];
+}
+
 interface RichTextProps {
-  content: any;
+  content: string | RichTextContent | null;
 }
 
 const RichText: React.FC<RichTextProps> = ({ content }) => {
@@ -23,8 +51,8 @@ const RichText: React.FC<RichTextProps> = ({ content }) => {
         return (
           <div className="rich-text">
             <p>
-              {content.children.map((child: any, i: number) => {
-                let textContent = child.text || '';
+              {content.children.map((child: RichTextChild, i: number) => {
+                let textContent: React.ReactNode = child.text || '';
                 
                 // Apply formatting based on format property if available
                 if (child.format && (child.format & 1)) textContent = <strong key={`bold-${i}`}>{textContent}</strong>;
@@ -42,10 +70,10 @@ const RichText: React.FC<RichTextProps> = ({ content }) => {
       if (content.root && Array.isArray(content.root.children)) {
         return (
           <div className="rich-text">
-            {content.root.children.map((node: any, i: number) => {
+            {content.root.children.map((node: RichTextNode, i: number) => {
               // Text node
               if (node.text) {
-                let textContent = node.text;
+                let textContent: React.ReactNode = node.text;
                 
                 // Apply formatting if available
                 if (node.bold) textContent = <strong key={i}>{textContent}</strong>;
@@ -59,8 +87,8 @@ const RichText: React.FC<RichTextProps> = ({ content }) => {
               if (node.type === 'paragraph') {
                 return (
                   <p key={i}>
-                    {node.children?.map((child: any, j: number) => {
-                      let textContent = child.text || '';
+                    {node.children?.map((child: RichTextChild, j: number) => {
+                      let textContent: React.ReactNode = child.text || '';
                       
                       // Apply formatting if available
                       if (child.bold) textContent = <strong key={`bold-${j}`}>{textContent}</strong>;
@@ -83,9 +111,9 @@ const RichText: React.FC<RichTextProps> = ({ content }) => {
               if (node.type === 'ul') {
                 return (
                   <ul key={i}>
-                    {node.children?.map((li: any, k: number) => (
+                    {node.children?.map((li: RichTextChild, k: number) => (
                       <li key={k}>
-                        {li.children?.map((liChild: any, l: number) => (
+                        {li.children?.map((liChild: RichTextChild, l: number) => (
                           <React.Fragment key={l}>{liChild.text || ''}</React.Fragment>
                         ))}
                       </li>
@@ -97,9 +125,9 @@ const RichText: React.FC<RichTextProps> = ({ content }) => {
               if (node.type === 'ol') {
                 return (
                   <ol key={i}>
-                    {node.children?.map((li: any, k: number) => (
+                    {node.children?.map((li: RichTextChild, k: number) => (
                       <li key={k}>
-                        {li.children?.map((liChild: any, l: number) => (
+                        {li.children?.map((liChild: RichTextChild, l: number) => (
                           <React.Fragment key={l}>{liChild.text || ''}</React.Fragment>
                         ))}
                       </li>
