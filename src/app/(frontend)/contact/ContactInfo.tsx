@@ -3,14 +3,16 @@
 import React, { useState, useEffect } from 'react'
 import Wasap from '../components/Wasap'
 
+interface ContactInfo {
+  address: string;
+  phone: string;
+  email: string;
+  whatsapp?: string;
+}
+
 interface ContactData {
   companyName: string;
-  contactInfo: {
-    address: string;
-    phone: string;
-    email: string;
-    whatsapp?: string;
-  };
+  contactInfo: ContactInfo;
 }
 
 const ContactInfo = () => {
@@ -26,6 +28,11 @@ const ContactInfo = () => {
           throw new Error('Failed to fetch contact data');
         }
         const data = await response.json();
+        
+        // Log the received data to help debug the structure
+        console.log('Received API data:', data);
+        
+        // Use the data as is, we'll handle missing fields in the UI
         setContactData(data);
         setLoading(false);
       } catch (err) {
@@ -56,7 +63,7 @@ const ContactInfo = () => {
     );
   }
 
-  if (error || !contactData) {
+  if (error) {
     return (
       <div className="text-center text-red-600 py-8">
         Unable to load contact information. Please try again later.
@@ -64,63 +71,70 @@ const ContactInfo = () => {
     );
   }
 
-  const { contactInfo } = contactData;
+  // Safely access contact info, ensuring we don't crash if structure is unexpected
+  const contactInfo = contactData?.contactInfo || {} as Partial<ContactInfo>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {/* Address Card */}
-      <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-        <div className="flex items-start">
-          <div className="mr-6 text-red-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Our Address</h3>
-            <p className="text-gray-600 whitespace-pre-line">{contactInfo.address}</p>
+      {contactInfo.address && (
+        <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex items-start">
+            <div className="mr-6 text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Our Address</h3>
+              <p className="text-gray-600 whitespace-pre-line">{contactInfo.address}</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Phone Card */}
-      <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-        <div className="flex items-start">
-          <div className="mr-6 text-red-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Phone Number</h3>
-            <p className="text-gray-600">
-              <a href={`tel:${contactInfo.phone}`} className="hover:text-red-600 transition-colors">
-                {contactInfo.phone}
-              </a>
-            </p>
+      {contactInfo.phone && (
+        <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex items-start">
+            <div className="mr-6 text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Phone Number</h3>
+              <p className="text-gray-600">
+                <a href={`tel:${contactInfo.phone}`} className="hover:text-red-600 transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Email Card */}
-      <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
-        <div className="flex items-start">
-          <div className="mr-6 text-red-600">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Email Address</h3>
-            <p className="text-gray-600">
-              <a href={`mailto:${contactInfo.email}`} className="hover:text-red-600 transition-colors">
-                {contactInfo.email}
-              </a>
-            </p>
+      {contactInfo.email && (
+        <div className="bg-white p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="flex items-start">
+            <div className="mr-6 text-red-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Email Address</h3>
+              <p className="text-gray-600">
+                <a href={`mailto:${contactInfo.email}`} className="hover:text-red-600 transition-colors">
+                  {contactInfo.email}
+                </a>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* WhatsApp Card */}
       {contactInfo.whatsapp && (
@@ -142,6 +156,13 @@ const ContactInfo = () => {
               </a>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Display a message if no contact info is available */}
+      {!contactInfo.address && !contactInfo.phone && !contactInfo.email && !contactInfo.whatsapp && (
+        <div className="col-span-1 md:col-span-2 text-center py-8">
+          <p className="text-gray-600">Contact information is currently unavailable.</p>
         </div>
       )}
     </div>

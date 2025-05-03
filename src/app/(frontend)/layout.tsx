@@ -4,9 +4,9 @@ import { Metadata } from 'next';
 import WhatsAppButtonClient from './components/WhatsAppButton';
 
 export const metadata: Metadata = {
-  title: 'PT Wahana Jaya Dinamika - Motor & Pneumatic Vibrator Specialist',
-  description: 'PT Wahana Jaya Dinamika - Motor & Pneumatic Vibrator Specialist PT Wahjadi Concrete internal vibrator motor & gear box rubber suspension',
-  keywords: 'motor, pneumatic, vibrator, industrial equipment, supplier, Indonesia, industrial solutions',
+  title: 'Kimsberlin - Opticals , Eyeglasses - Providing you the best eyeglasses solution Specialist',
+  description: 'Kimsberlin - Opticals , Eyeglasses - Providing you the best eyeglasses solution Specialist',
+  keywords: 'opticals, eyeglasses, glasses, sunglasses, contact lenses, eye care, eye health, eye care products, eye care solutions, eye care services, eye care products, eye care solutions, eye care services',
   robots: 'index, follow',
 };
 

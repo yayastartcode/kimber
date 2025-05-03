@@ -6,17 +6,17 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
-  title: 'About Us | PT. Wahana Jaya Dharma',
-  description: 'Learn more about PT. Wahana Jaya Dinamika, our history, mission, and values.',
+  title: 'About Us | Kimsberlin',
+  description: 'Learn more about Kimsberlin, our history, mission, and values.',
   openGraph: {
-    title: 'About Us | PT. Wahana Jaya Dinamika',
-    description: 'Learn more about PT. Wahana Jaya Dinamika, our history, mission, and values.',
+    title: 'About Us | Kimsberlin',
+    description: 'Learn more about Kimsberlin, our history, mission, and values.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About Us | PT. Wahana Jaya Dinamika',
-    description: 'Learn more about PT. Wahana Jaya Dinamika, our history, mission, and values.',
+    title: 'About Us | Kimsberlin',
+    description: 'Learn more about Kimsberlin, our history, mission, and values.',
   },
 }
 
@@ -26,7 +26,7 @@ const CompanyInfo = () => {
       <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold text-center mb-12">Our Company</h2>
         <p className="text-center max-w-4xl mx-auto mb-12 text-gray-600">
-          PT. Wahana Jaya Dinamika is a leading supplier of industrial equipment and solutions in Indonesia.
+        Kimsberlin is a leading opticals and eyeglasses supplier in Indonesia.
         </p>
         
         <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -34,10 +34,10 @@ const CompanyInfo = () => {
           <div className="bg-white p-8 rounded-lg shadow-md md:w-1/2">
             <div className="prose prose-lg max-w-none">
               <p>
-                Founded with a vision to provide high-quality industrial solutions, PT. Wahana Jaya Dinamika has grown to become a trusted partner for businesses across Indonesia.
+                Founded with a vision to provide high-quality industrial solutions, Kimsberlin has grown to become a trusted partner for businesses across Indonesia.
               </p>
               <p>
-                We specialize in motor and pneumatic vibrator equipment, providing reliable products that meet the highest industry standards. Our team of experts is dedicated to delivering exceptional service and support to all our clients.
+                We specialize opticals and eyeglass equipment, providing reliable products that meet the highest industry standards. Our team of experts is dedicated to delivering exceptional service and support to all our clients.
               </p>
               <p>
                 With years of experience in the industry, we understand the unique challenges faced by our customers and work tirelessly to provide customized solutions that address their specific needs.
@@ -66,7 +66,7 @@ export default function AboutPage() {
     <main>
       <Header />
       <div className="pt-4 pb-8">
-        <h1 className="text-4xl font-bold text-center mb-8">About PT. Wahana Jaya Dinamika</h1>
+        <h1 className="text-4xl font-bold text-center mb-8">About Kimsberlin</h1>
         <CompanyInfo />
         <LocationMap />
       </div>
