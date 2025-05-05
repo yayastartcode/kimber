@@ -114,7 +114,7 @@ const Footer = () => {
     return (
       <footer className="bg-gray-900 text-white">
         <div className="max-w-[1920px] mx-auto px-4 py-12 text-center">
-          <p className="text-gray-400">© {new Date().getFullYear()} PT. Wahana Jaya Dharma. All rights reserved.</p>
+          <p className="text-gray-400">© {new Date().getFullYear()} Kimsberlin. All rights reserved.</p>
         </div>
       </footer>
     );

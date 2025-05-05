@@ -17,6 +17,7 @@ interface ProcessedProduct {
   title: string;
   slug: string;
   price: number;
+  discountedPrice?: number | null;
   description: {
     root: {
       children: Array<{
@@ -42,12 +43,16 @@ interface ProcessedProduct {
 interface ProductDetailProps {
   product: ProcessedProduct;
   formattedPrice: string;
+  formattedDiscountedPrice?: string;
 }
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product, formattedPrice }) => {
+const ProductDetail: React.FC<ProductDetailProps> = ({ product, formattedPrice, formattedDiscountedPrice }) => {
   const [selectedImage, setSelectedImage] = useState(product.mainImageUrl);
   const [selectedAlt, setSelectedAlt] = useState(product.galleryImages[0]?.alt || product.title);
   const [whatsappNumber, setWhatsappNumber] = useState<string | null>(null);
+  
+  // Check if product has a discount
+  const hasDiscount = product.discountedPrice && product.discountedPrice < product.price;
   
   useEffect(() => {
     const fetchSiteSettings = async () => {
@@ -139,7 +144,16 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, formattedPrice }
         </h1>
         
         {/* Price */}
-        <p className="text-2xl font-semibold text-red-600 mb-4">{formattedPrice}</p>
+        <div className="mb-4">
+          {hasDiscount ? (
+            <div className="flex items-center gap-2">
+              <p className="text-gray-500 line-through text-xl">{formattedPrice}</p>
+              <p className="text-2xl font-semibold text-red-600">{formattedDiscountedPrice}</p>
+            </div>
+          ) : (
+            <p className="text-2xl font-semibold text-red-600">{formattedPrice}</p>
+          )}
+        </div>
         
         {/* Description */}
         <div className="prose prose-lg max-w-none mb-6 text-gray-600">
@@ -175,7 +189,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, formattedPrice }
         
         {/* WhatsApp Button */}
         <a 
-          href={whatsappNumber ? `https://wa.me/${whatsappNumber}?text=Halo, saya tertarik dengan produk: ${product.title} (${formattedPrice})` : '#'}
+          href={whatsappNumber ? `https://wa.me/${whatsappNumber}?text=Halo, saya tertarik dengan produk: ${product.title} (${hasDiscount ? formattedDiscountedPrice : formattedPrice})` : '#'}
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors mb-8 flex items-center justify-center gap-2 w-full lg:w-auto"

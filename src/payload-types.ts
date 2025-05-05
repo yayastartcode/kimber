@@ -221,6 +221,10 @@ export interface Product {
    * Product price in USD
    */
   price: number;
+  /**
+   * Optional: discounted price (leave empty if no discount)
+   */
+  discountedPrice?: number | null;
   description: {
     root: {
       type: string;
@@ -543,6 +547,7 @@ export interface ProductsSelect<T extends boolean = true> {
   title?: T;
   brand?: T;
   price?: T;
+  discountedPrice?: T;
   description?: T;
   category?: T;
   mainImage?: T;

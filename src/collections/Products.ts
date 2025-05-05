@@ -74,6 +74,16 @@ export const Products: CollectionConfig = {
               },
             },
             {
+              name: 'discountedPrice',
+              type: 'number',
+              required: false,
+              min: 0,
+              admin: {
+                description: 'Optional: discounted price (leave empty if no discount)',
+                step: 0.01,
+              },
+            },
+            {
               name: 'description',
               type: 'richText',
               required: true,

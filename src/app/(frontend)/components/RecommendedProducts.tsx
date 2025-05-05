@@ -9,6 +9,7 @@ interface Product {
   title: string;
   slug: string;
   price: number;
+  discountedPrice?: number | null;
   brand?: string;
   mainImage: {
     url: string;
@@ -21,22 +22,32 @@ const ProductCard = ({
   image, 
   title,
   price,
+  discountedPrice,
   brand,
   link = '#'
 }: { 
   image: string, 
   title: string,
   price: number,
+  discountedPrice?: number | null,
   brand?: string,
   link?: string
 }) => {
+  // Check if product has a discount
+  const hasDiscount = discountedPrice && discountedPrice < price;
+
   // Format price in Indonesian Rupiah
-  const formattedPrice = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price);
+  const formatPrice = (value: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const formattedOriginalPrice = formatPrice(price);
+  const formattedDiscountedPrice = hasDiscount ? formatPrice(discountedPrice!) : null;
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
@@ -53,7 +64,14 @@ const ProductCard = ({
         <div className="p-4 text-center">
           <p className="text-sm text-gray-500 uppercase tracking-wide mb-1">{brand || "SMARTSHOP"}</p>
           <h3 className="font-medium text-gray-800 mb-2">{title}</h3>
-          <p className="text-red-600 font-medium">{formattedPrice}</p>
+          {hasDiscount ? (
+            <div>
+              <p className="text-gray-500 line-through">{formattedOriginalPrice}</p>
+              <p className="text-red-600 font-medium">{formattedDiscountedPrice}</p>
+            </div>
+          ) : (
+            <p className="text-red-600 font-medium">{formattedOriginalPrice}</p>
+          )}
         </div>
       </Link>
     </div>
@@ -151,6 +169,7 @@ const RecommendedProducts = () => {
               image={product.mainImage.url} 
               title={product.title}
               price={product.price || 0}
+              discountedPrice={product.discountedPrice}
               brand={product.brand}
               link={`/products/${product.slug}`}
             />

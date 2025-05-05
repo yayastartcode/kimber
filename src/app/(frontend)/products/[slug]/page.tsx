@@ -9,6 +9,7 @@ interface Product {
   title: string;
   slug: string;
   price: number;
+  discountedPrice?: number | null;
   description: {
     root: {
       children: Array<{
@@ -229,13 +230,23 @@ export default async function ProductPage({ params }: { params: Params }) {
     ]
   };
   
-  // Format price in Indonesian Rupiah
-  const formattedPrice = new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(product.price || 0);
+  // Format price formatter for indonesian rupiah
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+  
+  // Format original price
+  const formattedPrice = formatPrice(product.price || 0);
+  
+  // Format discounted price if it exists
+  const formattedDiscountedPrice = product.discountedPrice 
+    ? formatPrice(product.discountedPrice) 
+    : undefined;
 
   return (
     <>
@@ -244,11 +255,12 @@ export default async function ProductPage({ params }: { params: Params }) {
         <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8">
           <ProductDetail 
             product={processedProduct} 
-            formattedPrice={formattedPrice} 
+            formattedPrice={formattedPrice}
+            formattedDiscountedPrice={formattedDiscountedPrice}
           />
         </div>
       </main>
       <Footer />
     </>
-  );
+  )
 }

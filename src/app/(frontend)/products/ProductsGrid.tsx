@@ -16,6 +16,7 @@ interface Product {
   };
   brand?: string;
   price?: number;
+  discountedPrice?: number | null;
   category?: string;
 }
 
@@ -34,16 +35,32 @@ function getImageUrl(product: Product): string {
   return `${baseUrl}${product.mainImage.url}`;
 }
 
+// Format price in Indonesian Rupiah
+function formatPrice(price: number): string {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+}
+
 // Product card component
 const ProductCard = ({ 
   image, 
   title,
+  price,
+  discountedPrice,
   link = '#'
 }: { 
   image: string, 
   title: string,
+  price?: number,
+  discountedPrice?: number | null,
   link?: string
 }) => {
+  const hasDiscount = discountedPrice && price && discountedPrice < price;
+  
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform duration-300 hover:shadow-md hover:-translate-y-1">
       <Link href={link} className="block">
@@ -58,6 +75,18 @@ const ProductCard = ({
         </div>
         <div className="p-4 text-center border-t">
           <h3 className="font-medium text-gray-800">{title}</h3>
+          {price !== undefined && (
+            <div className="mt-2 mb-3">
+              {hasDiscount ? (
+                <div className="flex flex-col items-center justify-center">
+                  <span className="line-through text-gray-500">{formatPrice(price)}</span>
+                  <span className="text-red-600 font-semibold">{formatPrice(discountedPrice!)}</span>
+                </div>
+              ) : (
+                <span className="text-gray-700">{formatPrice(price)}</span>
+              )}
+            </div>
+          )}
           <div className="mt-2">
             <span className="inline-block bg-red-100 text-red-600 px-3 py-1 text-sm rounded-full">
               View Details
@@ -135,6 +164,8 @@ const ProductsGrid = () => {
               key={product.id.toString()}
               image={imageUrl} 
               title={product.title}
+              price={product.price}
+              discountedPrice={product.discountedPrice}
               link={`/products/${product.slug}`}
             />
           );
