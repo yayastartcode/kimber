@@ -179,29 +179,7 @@ const Hero = () => {
               style={{ objectFit: 'cover' }}
             />
             
-            {/* Slide Content - Left Aligned */}
-            <div className="absolute inset-0 flex items-center">
-              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="w-full lg:w-1/2 text-white bg-transparent bg-opacity-30 p-6 rounded-lg backdrop-blur-sm">
-                  <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-                    {slide.title}
-                  </h2>
-                  {slide.description && (
-                    <p className="text-lg md:text-xl mb-6">
-                      {slide.description}
-                    </p>
-                  )}
-                  <Link 
-                    href={getWhatsAppUrl()} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-block bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-300"
-                  >
-                    Hubungi Kami
-                  </Link>
-                </div>
-              </div>
-            </div>
+    
           </div>
         ))}
       </div>
